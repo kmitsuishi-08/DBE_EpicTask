@@ -16,11 +16,12 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "TB_ET_TASK")
-@SequenceGenerator(name = "task", sequenceName = "SQ_TB_ET_TASK", allocationSize = 1)
+//@SequenceGenerator(name = "task", sequenceName = "SQ_TB_ET_TASK", allocationSize = 1) FOR ORACLE
 public class Task {
 	
 	@Id 
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task")
+//	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task") FOR ORACLE
+	@GeneratedValue(strategy = GenerationType.IDENTITY) // FOR H2
 	private Long id;
 	
 	@NotBlank(message = "O título é obrigatório. Digite um título")
