@@ -4,7 +4,11 @@ package br.com.fiap.apictask.controller.api;
 import java.net.URI;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,27 +26,30 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.fiap.apictask.model.Task;
 import br.com.fiap.apictask.repository.TaskRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/task")
+@Slf4j
 public class ApiTaskController {
 
 	@Autowired
 	private TaskRepository repository;
 	
 	@GetMapping()
+	@Cacheable("tasks")
 	public Page<Task> index(@RequestParam(required = false) String title,
 			@PageableDefault(size = 20) Pageable pageable) {
-		
 		if(title == null)
 			return repository.findAll(pageable);
 		
+		//TODO usar contains
 		return repository.findByTitleLike("%" + title + "%",pageable);
 	}
 	
 	@PostMapping()
-	public ResponseEntity<Task> create(@RequestBody Task task, UriComponentsBuilder uriBuilder) {
-		System.out.println(task);
+	@CacheEvict(value = "tasks", allEntries = true)
+	public ResponseEntity<Task> create(@RequestBody @Valid Task task, UriComponentsBuilder uriBuilder) {
 		repository.save(task);
 		URI uri = uriBuilder
 					.path("/api/task/{id}")
@@ -54,12 +62,11 @@ public class ApiTaskController {
 	@GetMapping("{id}")
 	public ResponseEntity<Task> get(@PathVariable Long id) 
 	{
-		Optional<Task> task = repository.findById(id);
-		if(task.isPresent()) return ResponseEntity.ok(task.get());
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.of(repository.findById(id));
 	}
 	
 	@DeleteMapping("{id}")
+	@CacheEvict(value = "tasks", allEntries = true)
 	public ResponseEntity<Task> delete(@PathVariable Long id) {
 		Optional<Task> task = repository.findById(id);
 		if(task.isEmpty()) 
@@ -69,6 +76,24 @@ public class ApiTaskController {
 		return ResponseEntity.ok().build();
 	}
 	
-	//FAZER UPDATE
-	
+	@PutMapping("{id}")
+	@CacheEvict(value = "tasks", allEntries = true)
+	public ResponseEntity<Task> update(@RequestBody @Valid Task newTask, @PathVariable Long id){
+		//log.info(task.toString());
+		
+		Optional<Task> optional = repository.findById(id);
+		
+		if(optional.isEmpty()) 
+			return ResponseEntity.notFound().build();
+		
+		Task task = optional.get();
+		
+		task.setTitle(newTask.getTitle());
+		task.setDescription(newTask.getDescription());
+		task.setPoints(newTask.getPoints());
+		
+		repository.save(task);
+		
+		return ResponseEntity.ok(task);
+	}
 }
