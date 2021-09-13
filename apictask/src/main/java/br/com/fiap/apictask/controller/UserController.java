@@ -1,10 +1,16 @@
 package br.com.fiap.apictask.controller;
 
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 import br.com.fiap.apictask.model.User;
 import br.com.fiap.apictask.repository.UserRepository;
@@ -16,20 +22,22 @@ public class UserController {
 	private UserRepository repository;
 	
 	@GetMapping("/user")
-	public String home() {
-		return "users";
+	public ModelAndView index() {
+		List<User> users = repository.findAll();
+		ModelAndView modelAndView = new ModelAndView("users");
+		modelAndView.addObject("users", users);
+		return modelAndView;
 	}
 	
 	@PostMapping("/user")
-	public String save(User user) {
+	public String save(@Valid User user, BindingResult result) {
+		if(result.hasErrors()) return "user-form";
 		repository.save(user);
-		System.out.println("Save user..." + user);
 		return "users";
 	}
 	
 	@RequestMapping("/user/new")
-	public String create() {
+	public String create(User user) {
 		return "user-form";
 	}
-	
 }

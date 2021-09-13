@@ -1,23 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Users</title>
 </head>
 <body>
 	<h1>Epic Task</h1>
-	
 	<h2>Novo usuário</h2>
-	
-	<form action="/user" method="post">
+	<form action="/user" method="post" th:object="${user}">
+	    <label for="name">Nome</label>
+		<input type="text" name="name" id="name" th:field="*{name}">
+		<span th:errors="*{name}"></span>
+		
 		<label for="email">E-mail</label>
-		<input type="text" name="email" id="email">
+		<input type="text" name="email" id="email" placeholder="exemplo.email@fiap.com.br"
+			th:field="*{email}" pattern="[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+" 
+			title="Digite um e-mail válido">
+		<span th:errors="*{email}"></span>
 		
 		<label for="password">Senha</label>
-		<input type="password" name="password" id="password">
+		<input type="password" name="password" id="password" th:field="*{password}">
+		<span th:errors="*{password}"></span>
 		
+		<a href="/user">Cancelar</a>
 		<button>Salvar</button>
 	</form>
-	
 </body>
 </html>

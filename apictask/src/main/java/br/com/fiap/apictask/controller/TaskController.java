@@ -22,7 +22,7 @@ public class TaskController {
 	private TaskRepository repository;
 	
 	@GetMapping("/task")
-	public ModelAndView home() {
+	public ModelAndView index() {
 		List<Task> tasks = repository.findAll();
 		ModelAndView modelAndView = new ModelAndView("tasks");
 		modelAndView.addObject("tasks", tasks);
@@ -31,8 +31,7 @@ public class TaskController {
 	
 	@PostMapping("/task")
 	public String save(@Valid Task task, BindingResult result) {
-		if(result.hasErrors()) 
-			return "task-form";
+		if (result.hasErrors()) return "task-form";
 		repository.save(task);
 		return "tasks";
 	}
