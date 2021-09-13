@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import br.com.fiap.apictask.model.Task;
 
 public interface TaskRepository extends JpaRepository<Task, Long>{
-	public Page<Task> findByTitleLike(String string, Pageable pageable);
+	Page<Task> findByTitleLike(String string, Pageable pageable);
 }
